@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DB관리 - 육군사관학교 운전교육 예약시스템</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        /* 헤더 스타일 */
+        header {
+            background-color: #fff;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logo {
+            width: 60px;
+            height: 60px;
+            background-color: #2e7d32;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .title-section h1 {
+            font-size: 1.5rem;
+            color: #2e7d32;
+            font-weight: 700;
+        }
+
+        .title-section p {
+            font-size: 0.9rem;
+            color: #666;
+            margin-top: 0.2rem;
+        }
+
+        /* 햄버거 메뉴 버튼 */
+        .menu-toggle {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            width: 30px;
+            height: 24px;
+            cursor: pointer;
+            border: none;
+            background: none;
+            padding: 0;
+        }
+
+        .menu-toggle span {
+            display: block;
+            height: 3px;
+            width: 100%;
+            background-color: #333;
+            border-radius: 2px;
+            transition: 0.3s;
+        }
+
+        .menu-toggle:hover span {
+            background-color: #2e7d32;
+        }
+
+        /* 네비게이션 메뉴 */
+        .nav-menu {
+            position: fixed;
+            top: 0;
+            right: -300px;
+            width: 300px;
+            height: 100vh;
+            background-color: white;
+            box-shadow: -2px 0 10px rgba(0,0,0,0.1);
+            transition: right 0.3s ease;
+            z-index: 1000;
+        }
+
+        .nav-menu.active {
+            right: 0;
+        }
+
+        .nav-header {
+            padding: 1.5rem;
+            background-color: #2e7d32;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-close {
+            font-size: 1.5rem;
+            cursor: pointer;
+            background: none;
+            border: none;
+            color: white;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .nav-menu ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .nav-menu li {
+            border-bottom: 1px solid #eee;
+        }
+
+        .nav-menu a {
+            display: block;
+            padding: 1rem 1.5rem;
+            color: #333;
+            text-decoration: none;
+            transition: background-color 0.3s;
+        }
+
+        .nav-menu a:hover {
+            background-color: #f5f5f5;
+        }
+
+        /* 오버레이 */
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            display: none;
+            z-index: 999;
+        }
+
+        .overlay.active {
+            display: block;
+        }
+
+        /* 메인 컨테이너 */
+        .main-container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+
+        /* DB 관리 섹션 */
+        .db-section {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+
+        .section-header {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #2e7d32;
+        }
+
+        .warning-box {
+            background-color: #fff3cd;
+            border: 1px solid #ffeeba;
+            color: #856404;
+            padding: 1rem;
+            border-radius: 4px;
+            margin-bottom: 2rem;
+        }
+
+        .warning-box h3 {
+            margin-bottom: 0.5rem;
+            font-size: 1.1rem;
+        }
+
+        .danger-box {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+            padding: 1rem;
+            border-radius: 4px;
+            margin-bottom: 2rem;
+        }
+
+        .date-range-form {
+            background-color: #f8f9fa;
+            padding: 2rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            font-size: 1.1rem;
+        }
+
+        .date-input {
+            padding: 0.8rem;
+            border: 2px solid #333;
+            border-radius: 4px;
+            font-size: 1rem;
+            width: 250px;
+        }
+
+        .date-input:focus {
+            outline: none;
+            border-color: #2e7d32;
+        }
+
+        .date-row {
+            display: flex;
+            gap: 2rem;
+            align-items: flex-end;
+            flex-wrap: wrap;
+        }
+
+        .delete-button {
+            padding: 0.8rem 2rem;
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .delete-button:hover {
+            background-color: #c82333;
+        }
+
+        .delete-button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+
+        /* 삭제 결과 표시 */
+        .result-section {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .result-message {
+            padding: 1rem;
+            border-radius: 4px;
+            margin-bottom: 1rem;
+            display: none;
+        }
+
+        .result-message.success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .result-message.error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .result-message.active {
+            display: block;
+        }
+
+        .statistics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .stat-card {
+            padding: 1rem;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+            text-align: center;
+            border-left: 4px solid #2e7d32;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #2e7d32;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: #666;
+            margin-top: 0.5rem;
+        }
+
+        /* 로딩 스피너 */
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .loading.active {
+            display: block;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #2e7d32;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* 반응형 디자인 */
+        @media (max-width: 768px) {
+            .header-container {
+                padding: 1rem;
+            }
+
+            .main-container {
+                padding: 0 1rem;
+            }
+
+            .db-section,
+            .result-section {
+                padding: 1.5rem;
+            }
+
+            .date-row {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .date-input {
+                width: 100%;
+            }
+
+            .delete-button {
+                width: 100%;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .title-section p {
+                display: none;
+            }
+
+            .statistics {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 헤더 -->
+    <header>
+        <div class="header-container">
+            <div class="logo-section">
+                <div class="logo">육사</div>
+                <div class="title-section">
+                    <h1>육군사관학교 운전교육 예약시스템</h1>
+                    <p>KMA Driving Edu Reservation</p>
+                </div>
+            </div>
+            <button class="menu-toggle" id="menuToggle">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+    </header>
+
+    <!-- 네비게이션 메뉴 -->
+    <nav class="nav-menu" id="navMenu">
+        <div class="nav-header">
+            <h3>관리자 메뉴</h3>
+            <button class="nav-close" id="navClose">×</button>
+        </div>
+        <ul>
+            <li><a href="https://kma-driving.o-r.kr">홈</a></li>
+            <li><a href="admin.html">관리자 대시보드</a></li>
+            <li><a href="dbmanage.html">DB관리</a></li>
+        </ul>
+    </nav>
+
+    <!-- 오버레이 -->
+    <div class="overlay" id="overlay"></div>
+
+    <!-- 메인 컨텐츠 -->
+    <main class="main-container">
+        <!-- DB 초기화 섹션 -->
+        <section class="db-section">
+            <h2 class="section-header">🗄️ 데이터베이스 관리</h2>
+            
+            <div class="warning-box">
+                <h3>⚠️ 주의사항</h3>
+                <p>선택한 날짜 범위의 모든 교육 일정과 예약 데이터가 영구적으로 삭제됩니다.</p>
+                <p>이 작업은 되돌릴 수 없으니 신중하게 진행해주세요.</p>
+            </div>
+
+            <div class="date-range-form">
+                <h3 style="margin-bottom: 1.5rem;">날짜 범위 선택</h3>
+                
+                <div class="date-row">
+                    <div class="form-group">
+                        <label for="startDate">시작 날짜</label>
+                        <input type="date" id="startDate" class="date-input">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="endDate">종료 날짜</label>
+                        <input type="date" id="endDate" class="date-input">
+                    </div>
+                    
+                    <button id="deleteButton" class="delete-button">데이터 삭제</button>
+                </div>
+            </div>
+
+            <div class="danger-box">
+                <h3>🔴 삭제 대상</h3>
+                <ul style="margin-left: 1.5rem; margin-top: 0.5rem;">
+                    <li>선택한 기간의 교육 일정 (availableDates)</li>
+                    <li>선택한 기간의 모든 예약 (reservations)</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- 결과 표시 섹션 -->
+        <section class="result-section">
+            <h2 class="section-header">📊 삭제 결과</h2>
+            
+            <div id="resultMessage" class="result-message"></div>
+            
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p style="margin-top: 1rem;">데이터를 삭제하는 중입니다...</p>
+            </div>
+            
+            <div class="statistics" id="statistics" style="display: none;">
+                <div class="stat-card">
+                    <div class="stat-number" id="deletedDates">0</div>
+                    <div class="stat-label">삭제된 교육 일정</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="deletedReservations">0</div>
+                    <div class="stat-label">삭제된 예약</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="totalDeleted">0</div>
+                    <div class="stat-label">전체 삭제 건수</div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Firebase SDK 및 JavaScript -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getAuth } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+        import { getFirestore, collection, query, where, getDocs, writeBatch } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+
+        // Firebase 설정
+        const firebaseConfig = {
+            apiKey: "AIzaSyAgZxM9bFkVzzLHTvDTY7HsoMVTDfQ-wIY",
+            authDomain: "kma-driving-education-booking.firebaseapp.com",
+            projectId: "kma-driving-education-booking",
+            storageBucket: "kma-driving-education-booking.firebasestorage.app",
+            messagingSenderId: "741013364677",
+            appId: "1:741013364677:web:22f620279dc8e72fcbb5ac"
+        };
+
+        // Firebase 초기화
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // DOM 요소
+        const menuToggle = document.getElementById('menuToggle');
+        const navMenu = document.getElementById('navMenu');
+        const navClose = document.getElementById('navClose');
+        const overlay = document.getElementById('overlay');
+        const startDate = document.getElementById('startDate');
+        const endDate = document.getElementById('endDate');
+        const deleteButton = document.getElementById('deleteButton');
+        const resultMessage = document.getElementById('resultMessage');
+        const loading = document.getElementById('loading');
+        const statistics = document.getElementById('statistics');
+        const deletedDatesEl = document.getElementById('deletedDates');
+        const deletedReservationsEl = document.getElementById('deletedReservations');
+        const totalDeletedEl = document.getElementById('totalDeleted');
+
+        // 메뉴 토글 기능
+        function openMenu() {
+            navMenu.classList.add('active');
+            overlay.classList.add('active');
+        }
+
+        function closeMenu() {
+            navMenu.classList.remove('active');
+            overlay.classList.remove('active');
+        }
+
+        menuToggle.addEventListener('click', openMenu);
+        navClose.addEventListener('click', closeMenu);
+        overlay.addEventListener('click', closeMenu);
+
+        // 메시지 표시 함수
+        function showMessage(message, type) {
+            resultMessage.textContent = message;
+            resultMessage.className = `result-message ${type} active`;
+            setTimeout(() => {
+                resultMessage.classList.remove('active');
+            }, 5000);
+        }
+
+        // 날짜 문자열 배열 생성 함수
+        function getDateRange(start, end) {
+            const dates = [];
+            const currentDate = new Date(start);
+            const endDate = new Date(end);
+            
+            while (currentDate <= endDate) {
+                dates.push(currentDate.toISOString().split('T')[0]);
+                currentDate.setDate(currentDate.getDate() + 1);
+            }
+            
+            return dates;
+        }
+
+        // 데이터 삭제 함수
+        async function deleteData() {
+            const start = startDate.value;
+            const end = endDate.value;
+            
+            // 유효성 검사
+            if (!start || !end) {
+                showMessage('시작 날짜와 종료 날짜를 모두 선택해주세요.', 'error');
+                return;
+            }
+            
+            if (start > end) {
+                showMessage('시작 날짜는 종료 날짜보다 이전이어야 합니다.', 'error');
+                return;
+            }
+            
+            // 삭제 확인
+            const dateRange = getDateRange(start, end);
+            const confirmMsg = `${start} ~ ${end} (총 ${dateRange.length}일)의 모든 데이터를 삭제하시겠습니까?\n\n이 작업은 되돌릴 수 없습니다.`;
+            
+            if (!confirm(confirmMsg)) {
+                return;
+            }
+            
+            // 한 번 더 확인
+            if (!confirm('정말로 삭제하시겠습니까?')) {
+                return;
+            }
+            
+            // 로딩 표시
+            loading.classList.add('active');
+            statistics.style.display = 'none';
+            deleteButton.disabled = true;
+            
+            try {
+                let deletedDatesCount = 0;
+                let deletedReservationsCount = 0;
+                
+                // 배치 작업 생성
+                const batch = writeBatch(db);
+                const MAX_BATCH_SIZE = 500; // Firestore 배치 제한
+                let currentBatchSize = 0;
+                
+                // 1. availableDates 컬렉션에서 날짜 범위 내 문서 삭제
+                const datesRef = collection(db, 'availableDates');
+                const datesQuery = query(
+                    datesRef,
+                    where('date', '>=', start),
+                    where('date', '<=', end)
+                );
+                const datesSnapshot = await getDocs(datesQuery);
+                
+                for (const doc of datesSnapshot.docs) {
+                    batch.delete(doc.ref);
+                    deletedDatesCount++;
+                    currentBatchSize++;
+                    
+                    // 배치 크기 제한 확인
+                    if (currentBatchSize >= MAX_BATCH_SIZE) {
+                        await batch.commit();
+                        currentBatchSize = 0;
+                    }
+                }
+                
+                // 2. reservations 컬렉션에서 날짜 범위 내 문서 삭제
+                const reservationsRef = collection(db, 'reservations');
+                const reservationsQuery = query(
+                    reservationsRef,
+                    where('date', '>=', start),
+                    where('date', '<=', end)
+                );
+                const reservationsSnapshot = await getDocs(reservationsQuery);
+                
+                for (const doc of reservationsSnapshot.docs) {
+                    batch.delete(doc.ref);
+                    deletedReservationsCount++;
+                    currentBatchSize++;
+                    
+                    // 배치 크기 제한 확인
+                    if (currentBatchSize >= MAX_BATCH_SIZE) {
+                        await batch.commit();
+                        currentBatchSize = 0;
+                    }
+                }
+                
+                // 남은 배치 커밋
+                if (currentBatchSize > 0) {
+                    await batch.commit();
+                }
+                
+                // 결과 표시
+                deletedDatesEl.textContent = deletedDatesCount;
+                deletedReservationsEl.textContent = deletedReservationsCount;
+                totalDeletedEl.textContent = deletedDatesCount + deletedReservationsCount;
+                
+                statistics.style.display = 'grid';
+                
+                showMessage(
+                    `${start} ~ ${end} 기간의 데이터가 성공적으로 삭제되었습니다.`,
+                    'success'
+                );
+                
+                // 입력 필드 초기화
+                startDate.value = '';
+                endDate.value = '';
+                
+            } catch (error) {
+                console.error('데이터 삭제 중 오류:', error);
+                showMessage('데이터 삭제 중 오류가 발생했습니다. 다시 시도해주세요.', 'error');
+            } finally {
+                loading.classList.remove('active');
+                deleteButton.disabled = false;
+            }
+        }
+
+        // 이벤트 리스너
+        deleteButton.addEventListener('click', deleteData);
+
+        // 오늘 날짜를 기본값으로 설정
+        const today = new Date().toISOString().split('T')[0];
+        startDate.value = today;
+        endDate.value = today;
+    </script>
+</body>
+</html>
