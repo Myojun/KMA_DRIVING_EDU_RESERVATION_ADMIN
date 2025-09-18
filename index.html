@@ -823,7 +823,7 @@
                     <td>${reservation.note || ''}</td>
                     <td>
                         ${reservation.status === '예약됨' 
-                            ? `<button class="cancel-button" onclick="cancelReservation('${reservation.id}', '${reservation.date}', '${reservation.time}', '${reservation.courseType}')">[ 취소 ]</button>`
+                            ? `<button class="cancel-button" onclick="cancelReservation('${reservation.id}', '${reservation.date}', '${reservation.time}', '${reservation.courseType}')">취소</button>`
                             : '<span style="color: #999;">취소됨</span>'
                         }
                     </td>
