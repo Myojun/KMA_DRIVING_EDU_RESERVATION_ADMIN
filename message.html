@@ -266,7 +266,7 @@
             const cleanPhone = phone.replace(/[^0-9]/g, '');
             
             // 메시지 내용 생성
-            const message = `${name} 생도 ${time} ${courseType} 정상 예약됨.\n교육 방문 전 예복습하고 오기 바랍니다.`;
+            const message = `${name} 생도 ${time} ${courseType} 예약 반영됨.\n교육 방문 전 예습하고 오기 바랍니다.`;
             
             // SMS URI 생성 (네이티브 메시지 앱 열기)
             const smsUri = `sms:${cleanPhone}?body=${encodeURIComponent(message)}`;
