@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>예약 문자 발송 시스템(테스트)</title>
+    <title>예약 문자 발송 시스템</title>
     <style>
         * {
             margin: 0;
@@ -138,7 +138,7 @@
 </head>
 <body>
     <div class="container">
-        <h1>📱 예약 문자 발송 시스템 (테스트)</h1>
+        <h1>📱 예약 문자 발송 시스템</h1>
         
         <div class="date-selector">
             <input type="date" id="dateInput">
@@ -152,18 +152,18 @@
     </div>
 
     <script type="module">
-        // Firebase 설정
+        // Firebase 설정 - 여기에 본인의 Firebase 설정을 입력하세요
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
         import { getFirestore, collection, query, where, getDocs } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 
-        // Firebase
+        // Firebase 설정 객체 (본인의 Firebase 프로젝트 설정으로 교체하세요)
         const firebaseConfig = {
-    apiKey: "AIzaSyAgZxM9bFkVzzLHTvDTY7HsoMVTDfQ-wIY",
-    authDomain: "kma-driving-education-booking.firebaseapp.com",
-    projectId: "kma-driving-education-booking",
-    storageBucket: "kma-driving-education-booking.firebasestorage.app",
-    messagingSenderId: "741013364677",
-    appId: "1:741013364677:web:22f620279dc8e72fcbb5ac"
+            apiKey: "AIzaSyAgZxM9bFkVzzLHTvDTY7HsoMVTDfQ-wIY",
+            authDomain: "kma-driving-education-booking.firebaseapp.com",
+            projectId: "kma-driving-education-booking",
+            storageBucket: "kma-driving-education-booking.firebasestorage.app",
+            messagingSenderId: "741013364677",
+            appId: "1:741013364677:web:22f620279dc8e72fcbb5ac"
         };
 
         // Firebase 초기화
@@ -244,7 +244,7 @@
                         <td>${item.time || '-'}</td>
                         <td>${item.status || '-'}</td>
                         <td>
-                            <button class="btn-send" onclick="sendMessage('${item.name}', '${item.phone}', '${item.timeSlot}', '${item.educationType}')">
+                            <button class="btn-send" onclick="sendMessage('${item.name}', '${item.phone}', '${item.time}', '${item.courseType}')">
                                 문자 발송
                             </button>
                         </td>
@@ -261,7 +261,7 @@
         }
 
         // 문자 발송 함수
-        window.sendMessage = function(name, phone, time, courseTypeType) {
+        window.sendMessage = function(name, phone, time, courseType) {
             // 전화번호에서 하이픈 제거
             const cleanPhone = phone.replace(/[^0-9]/g, '');
             
