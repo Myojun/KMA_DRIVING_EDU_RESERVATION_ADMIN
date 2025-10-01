@@ -262,12 +262,12 @@
         }
 
         // 문자 발송 함수
-        window.sendMessage = function(name, phone, time, courseType) {
+        window.sendMessage = function(name, phone, time, courseType, date) {
             // 전화번호에서 하이픈 제거
             const cleanPhone = phone.replace(/[^0-9]/g, '');
             
             // 메시지 내용 생성
-            const message = `${name} ${time} ${courseType}교육\n예약 반영 완료.`;
+            const message = `${name} ${date} ${time} ${courseType}교육\n예약 반영 완료.`;
             
             // SMS URI 생성 (네이티브 메시지 앱 열기)
             const smsUri = `sms:${cleanPhone}?body=${encodeURIComponent(message)}`;
