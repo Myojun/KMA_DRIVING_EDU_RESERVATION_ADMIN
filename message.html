@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>예약 문자 발송 시스템(테스트)</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            font-size: 24px;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .date-selector {
+            margin-bottom: 20px;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        input[type="date"] {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        button {
+            padding: 10px 20px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        button:hover {
+            background: #0056b3;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        .error {
+            padding: 20px;
+            background: #fee;
+            color: #c33;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+
+        th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #333;
+        }
+
+        tr:hover {
+            background: #f8f9fa;
+        }
+
+        .btn-send {
+            padding: 8px 16px;
+            background: #28a745;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+        }
+
+        .btn-send:hover {
+            background: #218838;
+        }
+
+        .no-data {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+
+            table {
+                font-size: 12px;
+            }
+
+            th, td {
+                padding: 8px 4px;
+            }
+
+            .btn-send {
+                padding: 6px 12px;
+                font-size: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📱 예약 문자 발송 시스템 (테스트)</h1>
+        
+        <div class="date-selector">
+            <input type="date" id="dateInput">
+            <button onclick="loadReservations()">조회</button>
+        </div>
+
+        <div id="errorMessage" class="error" style="display:none;"></div>
+        <div id="loading" class="loading" style="display:none;">데이터를 불러오는 중...</div>
+        
+        <div id="tableContainer"></div>
+    </div>
+
+    <script type="module">
+        // Firebase 설정
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getFirestore, collection, query, where, getDocs } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+
+        // Firebase
+        const firebaseConfig = {
+    apiKey: "AIzaSyAgZxM9bFkVzzLHTvDTY7HsoMVTDfQ-wIY",
+    authDomain: "kma-driving-education-booking.firebaseapp.com",
+    projectId: "kma-driving-education-booking",
+    storageBucket: "kma-driving-education-booking.firebasestorage.app",
+    messagingSenderId: "741013364677",
+    appId: "1:741013364677:web:22f620279dc8e72fcbb5ac"
+        };
+
+        // Firebase 초기화
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // 오늘 날짜를 기본값으로 설정
+        document.getElementById('dateInput').valueAsDate = new Date();
+
+        // 예약 데이터 로드 함수
+        window.loadReservations = async function() {
+            const dateInput = document.getElementById('dateInput').value;
+            if (!dateInput) {
+                showError('날짜를 선택해주세요.');
+                return;
+            }
+
+            showLoading(true);
+            hideError();
+
+            try {
+                // Firestore에서 데이터 조회
+                // 날짜 필드명은 실제 Firestore 구조에 맞게 수정하세요
+                const q = query(
+                    collection(db, "reservations"), // 컬렉션명 수정 필요
+                    where("date", "==", dateInput) // 날짜 필드명 수정 필요
+                );
+
+                const querySnapshot = await getDocs(q);
+                const reservations = [];
+
+                querySnapshot.forEach((doc) => {
+                    reservations.push({
+                        id: doc.id,
+                        ...doc.data()
+                    });
+                });
+
+                displayTable(reservations);
+            } catch (error) {
+                console.error('Error loading reservations:', error);
+                showError('데이터를 불러오는 중 오류가 발생했습니다: ' + error.message);
+            } finally {
+                showLoading(false);
+            }
+        };
+
+        // 테이블 표시 함수
+        function displayTable(data) {
+            const container = document.getElementById('tableContainer');
+
+            if (data.length === 0) {
+                container.innerHTML = '<div class="no-data">해당 날짜에 예약 데이터가 없습니다.</div>';
+                return;
+            }
+
+            let tableHTML = `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>이름</th>
+                            <th>전화번호</th>
+                            <th>교육구분</th>
+                            <th>시간대</th>
+                            <th>예약상태</th>
+                            <th>발송</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+
+            data.forEach(item => {
+                tableHTML += `
+                    <tr>
+                        <td>${item.name || '-'}</td>
+                        <td>${item.phone || '-'}</td>
+                        <td>${item.courseType || '-'}</td>
+                        <td>${item.time || '-'}</td>
+                        <td>${item.status || '-'}</td>
+                        <td>
+                            <button class="btn-send" onclick="sendMessage('${item.name}', '${item.phone}', '${item.timeSlot}', '${item.educationType}')">
+                                문자 발송
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            tableHTML += `
+                    </tbody>
+                </table>
+            `;
+
+            container.innerHTML = tableHTML;
+        }
+
+        // 문자 발송 함수
+        window.sendMessage = function(name, phone, time, courseTypeType) {
+            // 전화번호에서 하이픈 제거
+            const cleanPhone = phone.replace(/[^0-9]/g, '');
+            
+            // 메시지 내용 생성
+            const message = `${name} 생도 ${time} ${courseType} 정상 예약됨.\n교육 방문 전 예복습하고 오기 바랍니다.`;
+            
+            // SMS URI 생성 (네이티브 메시지 앱 열기)
+            const smsUri = `sms:${cleanPhone}?body=${encodeURIComponent(message)}`;
+            
+            // 네이티브 메시지 앱 열기
+            window.location.href = smsUri;
+        };
+
+        // 로딩 표시
+        function showLoading(show) {
+            document.getElementById('loading').style.display = show ? 'block' : 'none';
+        }
+
+        // 에러 메시지 표시
+        function showError(message) {
+            const errorDiv = document.getElementById('errorMessage');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+        }
+
+        // 에러 메시지 숨기기
+        function hideError() {
+            document.getElementById('errorMessage').style.display = 'none';
+        }
+
+        // 페이지 로드 시 오늘 날짜 데이터 자동 로드
+        window.addEventListener('load', () => {
+            // 자동 로드를 원하지 않으면 이 줄을 주석 처리하세요
+            // loadReservations();
+        });
+    </script>
+</body>
+</html>
