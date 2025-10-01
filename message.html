@@ -225,6 +225,7 @@
                 <table>
                     <thead>
                         <tr>
+                            <th>날짜</th>
                             <th>이름</th>
                             <th>전화번호</th>
                             <th>교육구분</th>
@@ -239,6 +240,7 @@
             data.forEach(item => {
                 tableHTML += `
                     <tr>
+                        <td>${item.date || '-'}</td>
                         <td>${item.name || '-'}</td>
                         <td>${item.phone || '-'}</td>
                         <td>${item.courseType || '-'}</td>
