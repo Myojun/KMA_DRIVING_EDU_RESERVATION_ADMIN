@@ -225,6 +225,7 @@
                 <table>
                     <thead>
                         <tr>
+                            <th>날짜</th>
                             <th>이름</th>
                             <th>전화번호</th>
                             <th>교육구분</th>
@@ -239,13 +240,14 @@
             data.forEach(item => {
                 tableHTML += `
                     <tr>
+                        <td>${item.date || '-'}</td>
                         <td>${item.name || '-'}</td>
                         <td>${item.phone || '-'}</td>
                         <td>${item.courseType || '-'}</td>
                         <td>${item.time || '-'}</td>
                         <td>${item.status || '-'}</td>
                         <td>
-                            <button class="btn-send" onclick="sendMessage('${item.name}', '${item.phone}', '${item.time}', '${item.courseType}')">
+                            <button class="btn-send" onclick="sendMessage('${item.date}, ${item.name}', '${item.phone}', '${item.time}', '${item.courseType}')">
                                 문자 발송
                             </button>
                         </td>
