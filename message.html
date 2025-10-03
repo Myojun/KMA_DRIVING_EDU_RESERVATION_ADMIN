@@ -267,8 +267,9 @@
             // 전화번호에서 하이픈 제거
             const cleanPhone = phone.replace(/[^0-9]/g, '');
 
-            // 날짜 포맷 변경 (2025-10-19 → 10/19)
-            const formattedDate = date.split('-').slice(1).join('-');
+            // 날짜 포맷 변경 (2025-10-19 → 10월 19일)
+            const [year, month, day] = date.split('-');
+            const formattedDate = `${parseInt(month)}월 ${parseInt(day)}일`;
             
             // 메시지 내용 생성
             const message = `${name} / ${formattedDate} / ${time} / ${courseType}교육\n예약 반영 완료.`;
