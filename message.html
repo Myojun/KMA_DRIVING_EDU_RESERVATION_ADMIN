@@ -245,7 +245,7 @@
 
             data.forEach(item => {
                 // 예약상태가 '취소'인 경우 cancelled 클래스 추가
-               const isCancelled = item.status === '취소됨' || item.status === '취소됨';
+               const isCancelled = item.status === 'cancelled' || item.status === '취소됨';
                const rowClass = isCancelled ? 'class="cancelled"' : '';
                 
                 tableHTML += `
