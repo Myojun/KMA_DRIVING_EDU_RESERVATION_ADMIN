@@ -96,6 +96,12 @@
             background: #f8f9fa;
         }
 
+        .cancelled {
+            text-decoration: line-through;
+            opacity: 0.6;
+            background: #f9f9f9;
+        }
+
         .btn-send {
             padding: 8px 16px;
             background: #28a745;
@@ -238,6 +244,10 @@
             `;
 
             data.forEach(item => {
+                // 예약상태가 '취소'인 경우 cancelled 클래스 추가
+               const isCancelled = item.status === '취소' || item.status === '취소됨';
+               const rowClass = isCancelled ? 'class="cancelled"' : '';
+                
                 tableHTML += `
                     <tr>
                         <td>${item.name || '-'}</td>
