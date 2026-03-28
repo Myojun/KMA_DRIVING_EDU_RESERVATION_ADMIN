@@ -450,6 +450,73 @@
                 display: none;
             }
         }
+
+        /* 비고 팝업 모달 */
+        .note-modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        .note-modal-overlay.active {
+            display: flex;
+        }
+        .note-modal {
+            background: #fff;
+            border-radius: 12px;
+            padding: 1.5rem;
+            max-width: 360px;
+            width: 90%;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+        }
+        .note-modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            border-bottom: 2px solid #2e7d32;
+            padding-bottom: 0.5rem;
+        }
+        .note-modal-header h3 {
+            color: #2e7d32;
+            font-size: 1rem;
+            font-weight: 700;
+        }
+        .note-modal-close {
+            background: none;
+            border: none;
+            font-size: 1.4rem;
+            cursor: pointer;
+            color: #666;
+            line-height: 1;
+        }
+        .note-modal-close:hover { color: #333; }
+        .note-modal-body {
+            font-size: 0.95rem;
+            color: #333;
+            line-height: 1.7;
+            word-break: break-all;
+        }
+        .note-button {
+            background-color: #2e7d32;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 0.3rem 0.7rem;
+            font-size: 0.78rem;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+        .note-button:hover { background-color: #1b5e20; }
+        .note-empty {
+            color: #aaa;
+            font-size: 0.82rem;
+            white-space: nowrap;
+        }
     </style>
 </head>
 <body>
@@ -490,6 +557,17 @@
 
     <!-- 오버레이 -->
     <div class="overlay" id="overlay"></div>
+
+    <!-- 비고 팝업 모달 -->
+    <div class="note-modal-overlay" id="noteModalOverlay">
+        <div class="note-modal">
+            <div class="note-modal-header">
+                <h3>📋 비고</h3>
+                <button class="note-modal-close" id="noteModalClose">×</button>
+            </div>
+            <div class="note-modal-body" id="noteModalBody"></div>
+        </div>
+    </div>
 
     <!-- 메인 컨텐츠 -->
     <main class="main-container">
@@ -822,7 +900,10 @@
                     <td style="color: ${reservation.status === '예약됨' ? '#2e7d32' : '#999'}; font-weight: 600;">
                         ${reservation.status}
                     </td>
-                    <td>${reservation.note || ''}</td>
+                    <td>${reservation.note && reservation.note.trim()
+                        ? `<button class="note-button" onclick="showNoteModal(this)" data-note="${reservation.note.replace(/"/g, '&quot;')}">비고 표시</button>`
+                        : '<span class="note-empty">비고 없음</span>'
+                    }</td>
                     <td>
                         ${reservation.status === '예약됨' 
                             ? `<button class="cancel-button" onclick="cancelReservation('${reservation.id}', '${reservation.date}', '${reservation.time}', '${reservation.courseType}')">취소</button>`
@@ -887,6 +968,19 @@
         const today = new Date().toISOString().split('T')[0];
         createDate.value = today;
         searchDate.value = today;
+
+        // 비고 팝업 모달
+        window.showNoteModal = function(btn) {
+            const note = btn.getAttribute('data-note');
+            document.getElementById('noteModalBody').textContent = note;
+            document.getElementById('noteModalOverlay').classList.add('active');
+        };
+        document.getElementById('noteModalClose').addEventListener('click', function() {
+            document.getElementById('noteModalOverlay').classList.remove('active');
+        });
+        document.getElementById('noteModalOverlay').addEventListener('click', function(e) {
+            if (e.target === this) this.classList.remove('active');
+        });
     </script>
 </body>
 </html>
