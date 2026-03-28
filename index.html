@@ -901,8 +901,8 @@
                         ${reservation.status}
                     </td>
                     <td>${reservation.note && reservation.note.trim()
-                        ? `<button class="note-button" onclick="showNoteModal(this)" data-note="${reservation.note.replace(/"/g, '&quot;')}">비고 표시</button>`
-                        : '<span class="note-empty">비고 없음</span>'
+                        ? `<button class="note-button" onclick="showNoteModal(this)" data-note="${reservation.note.replace(/"/g, '&quot;')}">표시</button>`
+                        : '<span class="note-empty">-</span>'
                     }</td>
                     <td>
                         ${reservation.status === '예약됨' 
