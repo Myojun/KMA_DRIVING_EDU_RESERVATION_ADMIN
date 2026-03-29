@@ -134,7 +134,7 @@
         }
 
         .cancelled {
-            text-decoration:;
+            text-decoration: ;
             opacity: 0.6;
             background: #f9f9f9;
         }
@@ -305,9 +305,32 @@
             displayTable(filtered);
         }
 
+        // 정렬 기준 정의
+        const COURSE_ORDER = ['기능', '도로기초', '도봉'];
+        const TIME_ORDER   = ['08', '10', '13', '15'];
+
+        function sortKey(item) {
+            const timePrefix = (item.time || '').replace(/[^0-9]/g, '').slice(0, 2);
+            const tIdx = TIME_ORDER.indexOf(timePrefix) !== -1
+                ? TIME_ORDER.indexOf(timePrefix)
+                : TIME_ORDER.length;
+
+            const cIdx = COURSE_ORDER.indexOf(item.courseType);
+            const courseIdx = cIdx !== -1 ? cIdx : COURSE_ORDER.length;
+
+            return [tIdx, courseIdx];
+        }
+
         // 테이블 표시
         function displayTable(data) {
             const container = document.getElementById('tableContainer');
+
+            // 시간대 우선, 그 다음 교육구분 순 정렬
+            data = [...data].sort((a, b) => {
+                const [at, ac] = sortKey(a);
+                const [bt, bc] = sortKey(b);
+                return at !== bt ? at - bt : ac - bc;
+            });
 
             if (data.length === 0) {
                 container.innerHTML = '<div class="no-data">해당 조건에 맞는 예약 데이터가 없습니다.</div>';
