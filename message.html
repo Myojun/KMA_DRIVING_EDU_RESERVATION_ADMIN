@@ -33,7 +33,7 @@
         }
 
         .date-selector {
-            margin-bottom: 20px;
+            margin-bottom: 12px;
             display: flex;
             gap: 10px;
             align-items: center;
@@ -58,6 +58,43 @@
 
         button:hover {
             background: #0056b3;
+        }
+
+        /* 상태 필터 체크박스 영역 */
+        .status-filter {
+            display: flex;
+            gap: 16px;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 10px 14px;
+            background: #f8f9fa;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            flex-wrap: wrap;
+        }
+
+        .status-filter span.filter-label {
+            font-size: 13px;
+            color: #555;
+            font-weight: 600;
+            margin-right: 4px;
+        }
+
+        .status-filter label {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 14px;
+            color: #333;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .status-filter input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+            accent-color: #007bff;
         }
 
         .loading {
@@ -97,7 +134,7 @@
         }
 
         .cancelled {
-            text-decoration: line-through;
+            text-decoration:;
             opacity: 0.6;
             background: #f9f9f9;
         }
@@ -139,6 +176,10 @@
                 padding: 6px 12px;
                 font-size: 12px;
             }
+
+            .status-filter {
+                gap: 10px;
+            }
         }
     </style>
 </head>
@@ -152,6 +193,20 @@
             <button onclick="loadReservations()">조회</button>
         </div>
 
+        <!-- 상태 필터 체크박스 -->
+        <div class="status-filter">
+            <span class="filter-label">상태 필터:</span>
+            <label>
+                <input type="checkbox" id="filterAll"> 전부
+            </label>
+            <label>
+                <input type="checkbox" id="filterBooked" checked> 예약됨
+            </label>
+            <label>
+                <input type="checkbox" id="filterCancelled"> 취소됨
+            </label>
+        </div>
+
         <div id="errorMessage" class="error" style="display:none;"></div>
         <div id="loading" class="loading" style="display:none;">데이터를 불러오는 중...</div>
         
@@ -159,11 +214,9 @@
     </div>
 
     <script type="module">
-        // Firebase 설정 - 여기에 본인의 Firebase 설정을 입력하세요
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
         import { getFirestore, collection, query, where, getDocs } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 
-        // Firebase 설정 객체 (본인의 Firebase 프로젝트 설정으로 교체하세요)
         const firebaseConfig = {
             apiKey: "AIzaSyAgZxM9bFkVzzLHTvDTY7HsoMVTDfQ-wIY",
             authDomain: "kma-driving-education-booking.firebaseapp.com",
@@ -173,14 +226,36 @@
             appId: "1:741013364677:web:22f620279dc8e72fcbb5ac"
         };
 
-        // Firebase 초기화
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // 오늘 날짜를 기본값으로 설정
         document.getElementById('dateInput').valueAsDate = new Date();
 
-        // 예약 데이터 로드 함수
+        // 전체 로드된 예약 데이터를 보관
+        let allReservations = [];
+
+        // ── 체크박스 상호작용 로직 ──────────────────────────────
+        const cbAll       = document.getElementById('filterAll');
+        const cbBooked    = document.getElementById('filterBooked');
+        const cbCancelled = document.getElementById('filterCancelled');
+
+        // '전부' 클릭 → 나머지 두 개 동기화
+        cbAll.addEventListener('change', () => {
+            cbBooked.checked    = cbAll.checked;
+            cbCancelled.checked = cbAll.checked;
+            renderFiltered();
+        });
+
+        // '예약됨' / '취소됨' 클릭 → '전부' 상태 동기화
+        [cbBooked, cbCancelled].forEach(cb => {
+            cb.addEventListener('change', () => {
+                cbAll.checked = cbBooked.checked && cbCancelled.checked;
+                renderFiltered();
+            });
+        });
+        // ────────────────────────────────────────────────────────
+
+        // 예약 데이터 로드
         window.loadReservations = async function() {
             const dateInput = document.getElementById('dateInput').value;
             if (!dateInput) {
@@ -192,25 +267,23 @@
             hideError();
 
             try {
-                // Firestore에서 데이터 조회
-                // 날짜 필드명은 실제 Firestore 구조에 맞게 수정하세요
                 const q = query(
-                    collection(db, "reservations"), // 컬렉션명 수정 필요
-                    where("date", "==", dateInput) // 날짜 필드명 수정 필요
+                    collection(db, "reservations"),
+                    where("date", "==", dateInput)
                 );
 
                 const querySnapshot = await getDocs(q);
-                const reservations = [];
+                allReservations = [];
 
                 querySnapshot.forEach((doc) => {
-                    reservations.push({
+                    allReservations.push({
                         id: doc.id,
                         date: dateInput,
                         ...doc.data()
                     });
                 });
 
-                displayTable(reservations);
+                renderFiltered();
             } catch (error) {
                 console.error('Error loading reservations:', error);
                 showError('데이터를 불러오는 중 오류가 발생했습니다: ' + error.message);
@@ -219,12 +292,25 @@
             }
         };
 
-        // 테이블 표시 함수
+        // 체크박스 상태에 따라 필터링 후 테이블 렌더링
+        function renderFiltered() {
+            const showBooked    = cbBooked.checked;
+            const showCancelled = cbCancelled.checked;
+
+            const filtered = allReservations.filter(item => {
+                const isCancelled = item.status === 'cancelled' || item.status === '취소됨';
+                return isCancelled ? showCancelled : showBooked;
+            });
+
+            displayTable(filtered);
+        }
+
+        // 테이블 표시
         function displayTable(data) {
             const container = document.getElementById('tableContainer');
 
             if (data.length === 0) {
-                container.innerHTML = '<div class="no-data">해당 날짜에 예약 데이터가 없습니다.</div>';
+                container.innerHTML = '<div class="no-data">해당 조건에 맞는 예약 데이터가 없습니다.</div>';
                 return;
             }
 
@@ -244,12 +330,11 @@
             `;
 
             data.forEach(item => {
-                // 예약상태가 '취소'인 경우 cancelled 클래스 추가
-               const isCancelled = item.status === 'cancelled' || item.status === '취소됨';
-               const rowClass = isCancelled ? 'class="cancelled"' : '';
-                
+                const isCancelled = item.status === 'cancelled' || item.status === '취소됨';
+                const rowClass = isCancelled ? 'class="cancelled"' : '';
+
                 tableHTML += `
-                    <tr>
+                    <tr ${rowClass}>
                         <td>${item.name || '-'}</td>
                         <td>${item.phone || '-'}</td>
                         <td>${item.courseType || '-'}</td>
@@ -264,54 +349,36 @@
                 `;
             });
 
-            tableHTML += `
-                    </tbody>
-                </table>
-            `;
-
+            tableHTML += `</tbody></table>`;
             container.innerHTML = tableHTML;
         }
 
-        // 문자 발송 함수
+        // 문자 발송
         window.sendMessage = function(name, phone, date, time, courseType) {
-            // 전화번호에서 하이픈 제거
             const cleanPhone = phone.replace(/[^0-9]/g, '');
-
-            // 날짜 포맷 변경 (2025-10-19 → 10월 19일)
             const [year, month, day] = date.split('-');
             const formattedDate = `${parseInt(month)}월 ${parseInt(day)}일`;
-            
-            // 메시지 내용 생성
             const message = `${name} / ${formattedDate} / ${time} / ${courseType}\n예약 반영 완료.`;
-            
-            // SMS URI 생성 (네이티브 메시지 앱 열기)
             const smsUri = `sms:${cleanPhone}?body=${encodeURIComponent(message)}`;
-            
-            // 네이티브 메시지 앱 열기
             window.location.href = smsUri;
         };
 
-        // 로딩 표시
         function showLoading(show) {
             document.getElementById('loading').style.display = show ? 'block' : 'none';
         }
 
-        // 에러 메시지 표시
         function showError(message) {
             const errorDiv = document.getElementById('errorMessage');
             errorDiv.textContent = message;
             errorDiv.style.display = 'block';
         }
 
-        // 에러 메시지 숨기기
         function hideError() {
             document.getElementById('errorMessage').style.display = 'none';
         }
 
-        // 페이지 로드 시 오늘 날짜 데이터 자동 로드
         window.addEventListener('load', () => {
-            // 자동 로드를 원하지 않으면 이 줄을 주석 처리하세요
-            // loadReservations();
+            // loadReservations(); // 자동 로드 원하면 주석 해제
         });
     </script>
 </body>
