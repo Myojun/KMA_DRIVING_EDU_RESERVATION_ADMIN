@@ -1,7 +1,7 @@
-import {$,node,status,todayKey,validDate,TIMES,COURSES,sorted,cancelled,showNote,confirmAction,deadline,explain,userError,phoneHash,normalizePhone,seedState,release,slotKey,tableCell,segmentedCell} from './admin-core.js?v=admin4';
-import {firebase,initialState,activeRecords} from './firebase.js?v=admin4';
-import {deletionPreview,previewTotals,assertFresh,sameManifest,deleteManifest} from './db-data.js?v=admin4';
-import {initDefaults} from './defaults.js?v=admin4';
+import {$,node,status,todayKey,validDate,TIMES,COURSES,sorted,cancelled,showNote,confirmAction,deadline,explain,userError,phoneHash,normalizePhone,seedState,release,slotKey,tableCell,segmentedCell} from './admin-core.js?v=admin7-17h';
+import {firebase,initialState,activeRecords} from './firebase.js?v=admin7-17h';
+import {deletionPreview,previewTotals,assertFresh,sameManifest,deleteManifest} from './db-data.js?v=admin7-17h';
+import {initDefaults} from './defaults.js?v=admin7-17h';
 initDefaults();$('createDate').value=$('searchDate').value=todayKey();let creating=false,searching=false,cancelling=false,deleting=false,version=0;
 $('deleteScheduleButton').addEventListener('click',async()=>{
  if(deleting||creating||cancelling)return;const date=$('createDate').value;if(!validDate(date)){status('createStatus','날짜를 선택해 주세요.','error');return;}

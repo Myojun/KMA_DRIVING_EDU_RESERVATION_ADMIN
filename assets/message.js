@@ -1,5 +1,5 @@
-import {$,node,status,todayKey,validDate,sorted,cancelled,smsURI,deadline,explain,tableCell,segmentedCell} from './admin-core.js?v=admin4';
-import {firebase} from './firebase.js?v=admin4';
+import {$,node,status,todayKey,validDate,sorted,cancelled,smsURI,deadline,explain,tableCell,segmentedCell} from './admin-core.js?v=admin7-17h';
+import {firebase} from './firebase.js?v=admin7-17h';
 let records=[],version=0,busy=false;
 $('dateInput').value=todayKey();
 function render(){

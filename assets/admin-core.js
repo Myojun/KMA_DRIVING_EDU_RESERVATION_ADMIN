@@ -1,7 +1,7 @@
-export {$, node, status, todayKey, validDate, displayDate, TIMES, COURSES, capacity, deadline, explain, userError, normalizePhone, phoneHash, seedState, release, slotKey, dateOfTimestamp} from './core.js?v=admin4';
-import {$,node,userError,validDate} from './core.js?v=admin4';
+export {$, node, status, todayKey, validDate, displayDate, TIMES, COURSES, capacity, deadline, explain, userError, normalizePhone, phoneHash, seedState, release, slotKey, dateOfTimestamp} from './core.js?v=admin7-17h';
+import {$,node,userError,validDate} from './core.js?v=admin7-17h';
 export const cancelled=r=>r.status==='취소됨'||r.status==='cancelled';
-export function sorted(records){const times=['08','10','13','15'],courses=['기능','도로기초','도봉'];const idx=(a,v)=>a.includes(v)?a.indexOf(v):a.length;return [...records].sort((a,b)=>idx(times,String(a.time||'').replace(/\D/g,'').slice(0,2))-idx(times,String(b.time||'').replace(/\D/g,'').slice(0,2))||idx(courses,a.courseType)-idx(courses,b.courseType)||String(a.name||'').localeCompare(String(b.name||''),'ko'));}
+export function sorted(records){const times=['08','10','13','15','17'],courses=['기능','도로기초','도봉'];const idx=(a,v)=>a.includes(v)?a.indexOf(v):a.length;return [...records].sort((a,b)=>idx(times,String(a.time||'').replace(/\D/g,'').slice(0,2))-idx(times,String(b.time||'').replace(/\D/g,'').slice(0,2))||idx(courses,a.courseType)-idx(courses,b.courseType)||String(a.name||'').localeCompare(String(b.name||''),'ko'));}
 // Preserve the supplied SMS template exactly, including the newline and punctuation.
 export function messageTemplate(name,date,time,courseType){if(!validDate(date))throw userError('교육 날짜가 올바르지 않습니다.');const [year,month,day]=date.split('-');const formattedDate=`${parseInt(month)}월 ${parseInt(day)}일`;return `${name} / ${formattedDate} / ${time} / ${courseType}\n예약 반영 완료.`;}
 export function smsURI(item){const cleanPhone=String(item.phone||'').replace(/[^0-9]/g,'');if(!/^01[016789]\d{7,8}$/.test(cleanPhone))throw userError('휴대전화 번호를 확인해 주세요.');return `sms:${cleanPhone}?body=${encodeURIComponent(messageTemplate(item.name,item.date,item.time,item.courseType))}`;}
