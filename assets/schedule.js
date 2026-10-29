@@ -1,10 +1,10 @@
-import {$,status,todayKey,validDate,TIMES,COURSES,deadline,explain,userError,confirmAction,seedState} from './admin-core.js?v=admin9-cards';
-import {firebase,activeRecords} from './firebase.js?v=admin9-cards';
-import {deletionPreview,previewTotals,assertFresh,sameManifest,deleteManifest} from './db-data.js?v=admin9-cards';
-import {configFingerprint,capacityShortages} from './schedule-model.js?v=admin9-cards';
-import {chooseCapacityCancellations} from './capacity-dialog.js?v=admin9-cards';
-import {saveSchedule} from './schedule-save.js?v=admin9-cards';
-import {initDefaults} from './defaults.js?v=admin9-cards';
+import {$,status,todayKey,validDate,TIMES,COURSES,deadline,explain,userError,confirmAction,seedState} from './admin-core.js?v=admin10-http';
+import {firebase,activeRecords} from './firebase.js?v=admin10-http';
+import {deletionPreview,previewTotals,assertFresh,sameManifest,deleteManifest} from './db-data.js?v=admin10-http';
+import {configFingerprint,capacityShortages} from './schedule-model.js?v=admin10-http';
+import {chooseCapacityCancellations} from './capacity-dialog.js?v=admin10-http';
+import {saveSchedule} from './schedule-save.js?v=admin10-http';
+import {initDefaults} from './defaults.js?v=admin10-http';
 const defaults=initDefaults();$('createDate').value=todayKey();let busy=false,loadedDate=null,loaded=null,baseline=null,loadVersion=0,deleting=false;
 function lock(value){busy=value;for(const id of ['createDate','loadSchedule','createButton','deleteScheduleButton','saveDefaults','loadDefaults','resetDefaults'])$(id).disabled=value;document.querySelectorAll('.capacity-input').forEach(input=>input.disabled=value);}
 function capacities(){const result={};for(const time of TIMES){result[time]={};for(const course of COURSES){const input=document.querySelector(`.capacity-input[data-time="${time}"][data-course="${course}"]`);if(input.value.trim()==='')throw userError('모든 정원을 입력해 주세요.');result[time][course]=Number(input.value);}}return result;}

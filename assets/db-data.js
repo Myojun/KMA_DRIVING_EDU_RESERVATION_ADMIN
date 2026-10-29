@@ -1,10 +1,10 @@
-import {deadline,range,documentSize,fingerprint,userError} from './admin-core.js?v=admin9-cards';
+import {deadline,range,documentSize,fingerprint,userError} from './admin-core.js?v=admin10-http';
 export const COLLECTIONS=['availableDates','reservations','announcements'];
 const PAGE=250;
 export async function walk(f,db,name,filters=[],orderFields=[],visit=()=>{},progress=()=>{}){
  let cursor=null,total=0;
  while(true){const constraints=[...filters,...orderFields.map(field=>f.orderBy(field)),f.orderBy(f.documentId()),f.limit(PAGE)];if(cursor)constraints.push(f.startAfter(cursor));const snapshot=await deadline(f.getDocsFromServer(f.query(f.collection(db,name),...constraints)),30000);
-  for(const doc of snapshot.docs){await visit(doc);total++;}progress(total);if(snapshot.size<PAGE)break;cursor=snapshot.docs.at(-1);
+  for(const doc of snapshot.docs){await visit(doc);total++;}progress(total);if(snapshot.size<PAGE)break;cursor=snapshot.docs[snapshot.docs.length-1];
  }
  return total;
 }

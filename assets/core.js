@@ -1,3 +1,4 @@
+import {sha256Hex} from './sha256.js?v=admin10-http';
 // Pure helpers, shared by pages and offline verification. No personal data is stored in the browser.
 export const TIMES = ['08시', '10시', '13시', '15시', '17시'];
 export const COURSES = ['기능', '도로기초', '도봉'];
@@ -6,17 +7,28 @@ export function node(tag, text, className) { const e = document.createElement(ta
 export function status(id, message, kind = '') { const e = $(id); e.textContent = message; e.className = 'status' + (kind ? ' ' + kind : ''); }
 export function todayKey(now = new Date()) { return new Intl.DateTimeFormat('sv-SE', {timeZone:'Asia/Seoul',year:'numeric',month:'2-digit',day:'2-digit'}).format(now); }
 export function validDate(key) { if (typeof key !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(key)) return false; const d = new Date(key + 'T12:00:00Z'); return Number.isFinite(+d) && d.toISOString().slice(0,10) === key; }
-export function displayDate(key) { return validDate(key) ? key.replaceAll('-', '.') : '날짜 확인 필요'; }
+export function displayDate(key) { return validDate(key) ? key.replace(/-/g, '.') : '날짜 확인 필요'; }
 export function slotKey(time, course) { if (!TIMES.includes(time) || !COURSES.includes(course)) throw new Error('교육 구분을 확인해 주세요.'); return `${time}|${course}`; }
 export function capacity(slot) { return slot?.isAvailable === true && Number.isInteger(slot.maxCapacity) && slot.maxCapacity > 0 ? slot.maxCapacity : 0; }
 export function normalizePhone(value) { const digits = String(value).replace(/\D/g, ''); return /^01[016789]\d{7,8}$/.test(digits) ? (digits.length === 11 ? digits.replace(/(\d{3})(\d{4})(\d{4})/, '$1-$2-$3') : digits.replace(/(\d{3})(\d{3})(\d{4})/, '$1-$2-$3')) : null; }
-export function phoneVariants(phone) { return [...new Set([phone, phone.replaceAll('-', '')])]; }
+export function phoneVariants(phone) { return [...new Set([phone, phone.replace(/-/g, '')])]; }
 export function bindPhone() { $('name').addEventListener('input', () => $('name').setCustomValidity('')); const input = $('phone'); input.addEventListener('input', () => input.setCustomValidity('')); input.addEventListener('blur', () => { const phone = normalizePhone(input.value); if (phone) input.value = phone; }); }
 export function readIdentity() { const name = $('name').value.trim(); const phone = normalizePhone($('phone').value); if (!name) { $('name').setCustomValidity('이름을 입력해 주세요.'); $('name').reportValidity(); return null; } $('name').setCustomValidity(''); if (!phone) { $('phone').setCustomValidity('휴대전화 번호를 확인해 주세요.'); $('phone').reportValidity(); return null; } $('phone').value = phone; return {name, phone}; }
 export async function deadline(promise, ms = 15000) { let timer; try { return await Promise.race([promise, new Promise((_, reject) => { timer = setTimeout(() => reject(new Error('READ_TIMEOUT')), ms); })]); } finally { clearTimeout(timer); } }
-export function explain(error) { if (error?.code === 'permission-denied') return '접근 권한을 확인할 수 없습니다. 관리자에게 문의해 주세요.'; if (error?.code === 'failed-precondition') return '데이터베이스 설정을 확인해야 합니다. 관리자에게 문의해 주세요.'; if (error?.message === 'READ_TIMEOUT') return '응답이 지연되고 있습니다. 연결을 확인한 뒤 다시 시도해 주세요.'; if (error?.code === 'unavailable' || navigator.onLine === false) return '인터넷 연결을 확인한 뒤 다시 시도해 주세요.'; if (error?.message?.startsWith('USER:')) return error.message.slice(5); return '요청을 처리하지 못했습니다. 잠시 후 다시 시도해 주세요.'; }
+export function explain(error) {
+ const code=String(error?.code||'').replace(/^firestore\//,'');
+ if(code==='permission-denied')return '접근 권한을 확인할 수 없습니다. 관리자에게 문의해 주세요.';
+ if(code==='unauthenticated')return '관리자 인증 상태를 확인해 주세요.';
+ if(code==='failed-precondition')return '데이터베이스 설정을 확인해야 합니다. 관리자에게 문의해 주세요.';
+ if(error?.message==='READ_TIMEOUT'||code==='deadline-exceeded')return '응답이 지연되고 있습니다. 연결을 확인한 뒤 다시 시도해 주세요.';
+ if(code==='unavailable'||navigator.onLine===false)return '인터넷 연결을 확인한 뒤 다시 시도해 주세요.';
+ if(error?.message?.startsWith('USER:'))return error.message.slice(5);
+ if(/dynamically imported module|module script|importing a module/i.test(error?.message||''))return 'Firebase 파일을 불러오지 못했습니다. 연결을 확인하고 새로고침해 주세요.';
+ const label=/^[a-z0-9_/-]{1,60}$/i.test(code)?code:['TypeError','ReferenceError','NotSupportedError','SecurityError'].includes(error?.name)?error.name:'';
+ return '요청을 처리하지 못했습니다. 새로고침 후 다시 시도해 주세요.'+(label?' ('+label+')':'');
+}
 export const userError = text => new Error('USER:' + text);
-export async function phoneHash(phone) { const data = new TextEncoder().encode(phone.replaceAll('-', '')); return Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256', data)), x => x.toString(16).padStart(2,'0')).join(''); }
+export async function phoneHash(phone) { return sha256Hex(phone.replace(/-/g, '')); }
 export function dateOfTimestamp(value) { try { const d = typeof value?.toDate === 'function' ? value.toDate() : typeof value === 'string' || typeof value === 'number' ? new Date(value) : null; return d && Number.isFinite(+d) ? d : null; } catch { return null; } }
 // Initial accounting is seeded once from legacy records, then every new mutation updates
 // the same date document in a transaction. Do not run old writers alongside this version.

@@ -1,6 +1,6 @@
-import {$,status,todayKey,validDate,TIMES,COURSES,cancelled,confirmAction,deadline,explain,userError,phoneHash,normalizePhone,release,slotKey} from './admin-core.js?v=admin9-cards';
-import {firebase,initialState} from './firebase.js?v=admin9-cards';
-import {renderReservationCards} from './reservation-cards.js?v=admin9-cards';
+import {$,status,todayKey,validDate,TIMES,COURSES,cancelled,confirmAction,deadline,explain,userError,phoneHash,normalizePhone,release,slotKey} from './admin-core.js?v=admin10-http';
+import {firebase,initialState} from './firebase.js?v=admin10-http';
+import {renderReservationCards} from './reservation-cards.js?v=admin10-http';
 const params=new URLSearchParams(location.search),requested=params.get('date');
 $('searchDate').value=validDate(requested)?requested:todayKey();
 let records=[],loadedDate=null,searching=false,cancelling=false,version=0;
@@ -8,7 +8,7 @@ function setBusy(value){$('searchButton').disabled=value;$('searchDate').disable
 function render(){
  const shown=records.filter(r=>cancelled(r)?$('filterCancelled').checked:$('filterBooked').checked);
  renderReservationCards($('reservationCards'),shown,cancel);
- $('resultCaption').textContent=loadedDate?`${loadedDate.replaceAll('-','.')} · ${shown.length}건`:'';
+ $('resultCaption').textContent=loadedDate?`${loadedDate.replace(/-/g,'.')} · ${shown.length}건`:'';
  if(loadedDate)status('searchStatus',shown.length?'':records.length?'선택한 상태의 예약이 없습니다.':'해당 날짜에 예약이 없습니다.');
 }
 async function search(){

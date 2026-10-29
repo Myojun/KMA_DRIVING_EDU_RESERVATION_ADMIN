@@ -1,5 +1,6 @@
-export {$, node, status, todayKey, validDate, displayDate, TIMES, COURSES, capacity, deadline, explain, userError, normalizePhone, phoneHash, seedState, release, slotKey, dateOfTimestamp} from './core.js?v=admin9-cards';
-import {$,node,userError,validDate} from './core.js?v=admin9-cards';
+import {sha256Hex,utf8Bytes} from './sha256.js?v=admin10-http';
+export {$, node, status, todayKey, validDate, displayDate, TIMES, COURSES, capacity, deadline, explain, userError, normalizePhone, phoneHash, seedState, release, slotKey, dateOfTimestamp} from './core.js?v=admin10-http';
+import {$,node,userError,validDate} from './core.js?v=admin10-http';
 export const cancelled=r=>r.status==='취소됨'||r.status==='cancelled';
 export function sorted(records){const times=['08','10','13','15','17'],courses=['기능','도로기초','도봉'];const idx=(a,v)=>a.includes(v)?a.indexOf(v):a.length;return [...records].sort((a,b)=>idx(times,String(a.time||'').replace(/\D/g,'').slice(0,2))-idx(times,String(b.time||'').replace(/\D/g,'').slice(0,2))||idx(courses,a.courseType)-idx(courses,b.courseType)||String(a.name||'').localeCompare(String(b.name||''),'ko'));}
 // Preserve the supplied SMS template exactly, including the newline and punctuation.
@@ -14,7 +15,7 @@ export function confirmAction({title,text,label='확인'}){
 }
 export function range(start,end){if(!validDate(start)||!validDate(end)||start>end)throw userError('시작 날짜와 종료 날짜를 확인해 주세요.');return {start,end};}
 export function bytes(n){if(!Number.isFinite(n))return '—';if(n<1024)return `${n.toLocaleString('ko-KR')} B`;if(n<1024**2)return `${(n/1024).toFixed(1)} KiB`;return `${(n/1024**2).toFixed(2)} MiB`;}
-const utf8=s=>new TextEncoder().encode(String(s)).length+1;
+const utf8=s=>utf8Bytes(s).length+1;
 // Firestore standard-edition document data estimate. Indexes, backups, PITR and
 // subcollections are excluded. Unknown SDK types fail rather than claiming a total.
 export function valueSize(value){
@@ -45,7 +46,7 @@ export function canonical(value){
  if(value&&typeof value==='object')return Object.keys(value).sort().map(k=>[k,canonical(value[k])]);
  return value;
 }
-export async function fingerprint(data){const digest=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(JSON.stringify(canonical(data))));return [...new Uint8Array(digest)].map(x=>x.toString(16).padStart(2,'0')).join('');}
+export async function fingerprint(data){return sha256Hex(JSON.stringify(canonical(data)));}
 export function tableCell(row,value){const cell=node('td',value??'—');row.append(cell);return cell;}
 
 export function segmentedCell(row,value,kind){const cell=tableCell(row,'');cell.className=kind+'-cell';const text=String(value??'—');const parts=kind==='date'&&/^\d{4}-\d{2}-\d{2}$/.test(text)?[text.slice(0,5),text.slice(5)]:kind==='phone'&&/^\d{3}-\d{3,4}-\d{4}$/.test(text)?text.match(/[^-]+-?/g):[text];for(const part of parts)cell.append(node('span',part,'cell-segment'));return cell;}

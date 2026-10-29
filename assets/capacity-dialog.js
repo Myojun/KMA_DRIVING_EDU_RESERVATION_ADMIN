@@ -1,4 +1,4 @@
-import {$,node,sorted,userError} from './admin-core.js?v=admin9-cards';
+import {$,node,sorted,userError} from './admin-core.js?v=admin10-http';
 export function chooseCapacityCancellations(groups,records){
  const total=groups.reduce((n,g)=>n+g.needed,0);
  if(total>150)throw userError('한 번에 150건까지 취소할 수 있습니다. 정원을 나누어 조정해 주세요.');

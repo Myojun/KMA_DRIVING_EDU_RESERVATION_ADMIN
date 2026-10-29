@@ -1,6 +1,6 @@
-import {configFingerprint,updateScheduleModel} from './schedule-model.js?v=admin9-cards';
-import {cancelled,validDate,TIMES,COURSES,normalizePhone,phoneHash,release,userError} from './admin-core.js?v=admin9-cards';
-import {cloneState} from './core.js?v=admin9-cards';
+import {configFingerprint,updateScheduleModel} from './schedule-model.js?v=admin10-http';
+import {cancelled,validDate,TIMES,COURSES,normalizePhone,phoneHash,release,userError} from './admin-core.js?v=admin10-http';
+import {cloneState} from './core.js?v=admin10-http';
 // Only reads occur until every selected cancellation and the new capacity is valid.
 // The reservations and schedule are committed together, or none are changed.
 export async function saveSchedule(f,db,{date,capacities,seed,creating,expected,cancellations=[]}){
