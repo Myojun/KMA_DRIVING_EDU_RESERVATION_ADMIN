@@ -1,6 +1,6 @@
-import {$,node,status,todayKey,validDate,bytes,deadline,explain,userError,confirmAction,tableCell} from './admin-core.js?v=admin7-17h';
-import {firebase} from './firebase.js?v=admin7-17h';
-import {usage,deletionPreview,sameManifest,previewTotals,assertFresh,deleteManifest} from './db-data.js?v=admin7-17h';
+import {$,node,status,todayKey,validDate,bytes,deadline,explain,userError,confirmAction,tableCell} from './admin-core.js?v=admin9-cards';
+import {firebase} from './firebase.js?v=admin9-cards';
+import {usage,deletionPreview,sameManifest,previewTotals,assertFresh,deleteManifest} from './db-data.js?v=admin9-cards';
 let preview=null,currentUsage=null,working=false,expiry=null,deleting=false;
 const params=new URLSearchParams(location.search);$('startDate').value=validDate(params.get('start'))?params.get('start'):todayKey();$('endDate').value=validDate(params.get('end'))?params.get('end'):$('startDate').value;
 function lock(value){working=value;for(const id of ['loadUsage','previewButton','startDate','endDate'])$(id).disabled=value;$('deleteButton').disabled=value||!preview?.entries.length;}

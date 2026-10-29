@@ -1,4 +1,4 @@
-import {$,status,TIMES,COURSES,userError} from './admin-core.js?v=admin7-17h';
+import {$,status,TIMES,COURSES,userError} from './admin-core.js?v=admin9-cards';
 export const DEFAULTS_KEY='kma-driving-admin.capacity-defaults.v1';
 export const ORIGINAL_DEFAULTS=[[4,3,2],[3,2,2],[4,3,2],[3,2,2],[0,0,0]];
 export function validateDefaults(value){if(!Array.isArray(value)||value.length!==TIMES.length||value.some(row=>!Array.isArray(row)||row.length!==3||row.some(n=>!Number.isInteger(n)||n<0||n>99)))throw userError('저장된 기본값 형식이 올바르지 않습니다.');return value.map(row=>[...row]);}
@@ -13,5 +13,5 @@ export function initDefaults(){
  $('loadDefaults').addEventListener('click',load);
  $('resetDefaults').addEventListener('click',()=>{apply(ORIGINAL_DEFAULTS);status('defaultsStatus','초기값 적용 · 저장하려면 기본값 저장을 눌러 주세요.');});
  window.addEventListener('storage',event=>{if(event.key===DEFAULTS_KEY)status('defaultsStatus','다른 탭에서 기본값 변경됨 · 저장값 불러오기');});
- load();
+ load();return {load};
 }
