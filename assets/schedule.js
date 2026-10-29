@@ -1,10 +1,10 @@
-import {$,status,todayKey,validDate,TIMES,COURSES,deadline,explain,userError,confirmAction,seedState} from './admin-core.js?v=admin10-http';
-import {firebase,activeRecords} from './firebase.js?v=admin10-http';
-import {deletionPreview,previewTotals,assertFresh,sameManifest,deleteManifest} from './db-data.js?v=admin10-http';
-import {configFingerprint,capacityShortages} from './schedule-model.js?v=admin10-http';
-import {chooseCapacityCancellations} from './capacity-dialog.js?v=admin10-http';
-import {saveSchedule} from './schedule-save.js?v=admin10-http';
-import {initDefaults} from './defaults.js?v=admin10-http';
+import {$,status,todayKey,validDate,TIMES,COURSES,deadline,explain,userError,confirmAction,seedState} from './admin-core.js?v=admin11-slots';
+import {firebase,activeRecords} from './firebase.js?v=admin11-slots';
+import {deletionPreview,previewTotals,assertFresh,sameManifest,deleteManifest} from './db-data.js?v=admin11-slots';
+import {configFingerprint,capacityShortages} from './schedule-model.js?v=admin11-slots';
+import {chooseCapacityCancellations} from './capacity-dialog.js?v=admin11-slots';
+import {saveSchedule} from './schedule-save.js?v=admin11-slots';
+import {initDefaults} from './defaults.js?v=admin11-slots';
 const defaults=initDefaults();$('createDate').value=todayKey();let busy=false,loadedDate=null,loaded=null,baseline=null,loadVersion=0,deleting=false;
 function lock(value){busy=value;for(const id of ['createDate','loadSchedule','createButton','deleteScheduleButton','saveDefaults','loadDefaults','resetDefaults'])$(id).disabled=value;document.querySelectorAll('.capacity-input').forEach(input=>input.disabled=value);}
 function capacities(){const result={};for(const time of TIMES){result[time]={};for(const course of COURSES){const input=document.querySelector(`.capacity-input[data-time="${time}"][data-course="${course}"]`);if(input.value.trim()==='')throw userError('모든 정원을 입력해 주세요.');result[time][course]=Number(input.value);}}return result;}
@@ -23,7 +23,7 @@ $('createForm').addEventListener('submit',async event=>{
  try{const {f,db}=await deadline(firebase());const ref=f.doc(db,'availableDates',date);const [snapshot,records]=await deadline(Promise.all([f.getDocFromServer(ref),activeRecords(f,db,date)]));
   if(snapshot.exists()===creating)throw userError('교육 개설 상태가 변경되었습니다. 다시 불러와 주세요.');const current=snapshot.exists()?snapshot.data():{};
   if(!creating&&await configFingerprint(current)!==expected)throw userError('다른 곳에서 교육을 수정했습니다. 다시 불러와 주세요.');
-  const seed=await seedState(records),shortages=capacityShortages(current,values,seed);
+  const seed=await seedState(records,current),shortages=capacityShortages(current,values,seed);
   let selected=[];
   if(shortages.length){selected=await chooseCapacityCancellations(shortages,records);if(selected===null){status('createStatus','수정을 취소했습니다.');return;}}
   status('createStatus',selected.length?'예약 취소 및 정원 저장 중':creating?'교육 개설 중':'교육 수정 중');

@@ -1,4 +1,4 @@
-import {node,sorted,cancelled,smsURI,showNote} from './admin-core.js?v=admin10-http';
+import {node,sorted,cancelled,smsURI,showNote} from './admin-core.js?v=admin11-slots';
 export function renderReservationCards(container,records,onCancel){
  container.replaceChildren();
  for(const r of sorted(records)){

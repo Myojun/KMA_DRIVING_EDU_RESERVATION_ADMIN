@@ -25,7 +25,7 @@ export async function activeRecords(f, db, date) {
 // read the date document, rather than downloading every reservation for that date.
 export async function initialState(f, db, date) {
  const snapshot=await f.getDocFromServer(f.doc(db,'availableDates',date));
- if (!snapshot.exists() || snapshot.data().bookingState?.version === 1) return null;
- const {seedState}=await import('./core.js?v=admin10-http');
- return seedState(await activeRecords(f,db,date));
+ if (!snapshot.exists() || snapshot.data().bookingState?.version === 2) return null;
+ const {seedState}=await import('./core.js?v=admin11-slots');
+ return seedState(await activeRecords(f,db,date),snapshot.data());
 }

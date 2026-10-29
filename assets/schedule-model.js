@@ -1,5 +1,5 @@
-import {TIMES,COURSES,cloneState,slotKey,userError} from './core.js?v=admin10-http';
-import {fingerprint} from './admin-core.js?v=admin10-http';
+import {TIMES,COURSES,cloneState,slotKey,userError} from './core.js?v=admin11-slots';
+import {fingerprint} from './admin-core.js?v=admin11-slots';
 export function scheduleConfig(data){
  if(!data)return null;const slots={};
  for(const [time,courses] of Object.entries(data.timeSlots||{})){

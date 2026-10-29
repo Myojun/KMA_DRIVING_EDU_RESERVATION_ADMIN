@@ -1,6 +1,6 @@
-import {$,status,todayKey,validDate,TIMES,COURSES,cancelled,confirmAction,deadline,explain,userError,phoneHash,normalizePhone,release,slotKey} from './admin-core.js?v=admin10-http';
-import {firebase,initialState} from './firebase.js?v=admin10-http';
-import {renderReservationCards} from './reservation-cards.js?v=admin10-http';
+import {$,status,todayKey,validDate,TIMES,COURSES,cancelled,confirmAction,deadline,explain,userError,phoneHash,normalizePhone,release,slotKey} from './admin-core.js?v=admin11-slots';
+import {firebase,initialState} from './firebase.js?v=admin11-slots';
+import {renderReservationCards} from './reservation-cards.js?v=admin11-slots';
 const params=new URLSearchParams(location.search),requested=params.get('date');
 $('searchDate').value=validDate(requested)?requested:todayKey();
 let records=[],loadedDate=null,searching=false,cancelling=false,version=0;

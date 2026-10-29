@@ -1,5 +1,5 @@
-import {$,status,dateOfTimestamp,deadline,explain,userError,confirmAction,fingerprint} from './admin-core.js?v=admin10-http';
-import {firebase} from './firebase.js?v=admin10-http';
+import {$,status,dateOfTimestamp,deadline,explain,userError,confirmAction,fingerprint} from './admin-core.js?v=admin11-slots';
+import {firebase} from './firebase.js?v=admin11-slots';
 let busy=false,current=null,baseline=null,dirty=false,editorReady=false;
 function lock(value){busy=value;for(const id of ['saveNotice','deleteNotice','reloadNotice','resetNotice','announcementText'])$(id).disabled=value;}
 async function load(force=false){
